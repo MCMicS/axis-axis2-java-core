@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -296,7 +297,20 @@ public class BasicHttpServerImpl implements BasicHttpServer {
 
                 });
                 
-            }            
+            }   else if (server.getResponseTemplate().equals(BasicHttpServer.RESPONSE_HTTP_COOKIE)) {
+                response.setStatusCode(HttpStatus.SC_OK);
+                response.addHeader(HTTPConstants.HEADER_SET_COOKIE, "JSESSIONID=abcde12345; Path=/; HttpOnly");
+                body = new EntityTemplate(new ContentProducer() {
+                    public void writeTo(final OutputStream outstream) throws IOException {
+                        OutputStreamWriter writer = new OutputStreamWriter(outstream, "UTF-8");
+                        writer.write("<Response>Cookie should be set<Response>");
+                        writer.flush();
+                    }
+                });
+
+                response.setEntity(body);
+
+            }
             
             // TODO - customize to send content type depend on expectations.
             body.setContentType("text/html; charset=UTF-8");
